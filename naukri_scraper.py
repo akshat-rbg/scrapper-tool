@@ -101,27 +101,27 @@ async def _scrape_page(url: str) -> list[dict]:
             return []
 
         jobs = await page.evaluate(""" 
-            () => Array.from(document.querySelectorAll('.srp-jobtuple-wrapper')).map(card => {
-                const q = (sel) => card.querySelector(sel);                                                                                                                             
-                const text = (sel) => { const el = q(sel); return el ? el.innerText.trim() : ''; };                                                                                     
-                const attr = (sel, a) => { const el = q(sel); return el ? el.getAttribute(a) : ''; };                                                                                   
-                const titleEl = q('a.title');                                                                                                                                           
-                return {                                                                                                                                                                
-                    title: titleEl ? titleEl.innerText.trim() : '',                                                                                                                     
-                    url: titleEl ? titleEl.getAttribute('href') : '',                                                                                                                   
-                    company: text('a.comp-name'),                                                                                                                                       
-                    company_url: attr('a.comp-name', 'href'),                                                                                                                           
-                    experience: text('.expwdth'),                                                                                                                                       
-                    location: text('.locWdth'),                                                                                                                                         
-                    salary: text('.sal-wrap span') || text('.sal'),
-                    description: text('.job-desc'),                                                                                                                                     
-                    skills: Array.from(card.querySelectorAll('.tags-gt li')).map(li => li.innerText.trim()),
-                    posted: text('.job-post-day'),                                                                                                                                      
-                    rating: text('.rating .main-2'),                                                                                                                                    
-                    reviews: text('.review'),                                                                                                                                           
-                };                                                                                                                                                                      
-            })  
-            """)
+        () => Array.from(document.querySelectorAll('.srp-jobtuple-wrapper')).map(card => {
+            const q = (sel) => card.querySelector(sel);                                                                                                                             
+            const text = (sel) => { const el = q(sel); return el ? el.innerText.trim() : ''; };                                                                                     
+            const attr = (sel, a) => { const el = q(sel); return el ? el.getAttribute(a) : ''; };                                                                                   
+            const titleEl = q('a.title');                                                                                                                                           
+            return {                                                                                                                                                                
+                title: titleEl ? titleEl.innerText.trim() : '',                                                                                                                     
+                url: titleEl ? titleEl.getAttribute('href') : '',                                                                                                                   
+                company: text('a.comp-name'),                                                                                                                                       
+                company_url: attr('a.comp-name', 'href'),                                                                                                                           
+                experience: text('.expwdth'),                                                                                                                                       
+                location: text('.locWdth'),                                                                                                                                         
+                salary: text('.sal-wrap span') || text('.sal'),
+                description: text('.job-desc'),                                                                                                                                     
+                skills: Array.from(card.querySelectorAll('.tags-gt li')).map(li => li.innerText.trim()),
+                posted: text('.job-post-day'),                                                                                                                                      
+                rating: text('.rating .main-2'),                                                                                                                                    
+                reviews: text('.review'),                                                                                                                                           
+            };                                                                                                                                                                      
+        })  
+        """)
         return jobs
     finally:
         await ctx.close()
@@ -139,22 +139,22 @@ async def _fetch_applicants(job_url: str) -> dict:
         await page.wait_for_timeout(1500)
         data = await page.evaluate(
             """                                                                                                                                                                         
-            () => {
-                const result = { applicants: '', openings: '', posted_on: '', views: '' };                                                                                              
-                const all = document.querySelectorAll('span, div, label');                                                                                                              
-                for (const el of all) {
-                    const t = (el.innerText || '').trim();                                                                                                                              
-                    if (!t || t.length > 80) continue;                                                                                                                                  
-                    const lower = t.toLowerCase();
-                    if (!result.applicants && lower.includes('applicant')) result.applicants = t;                                                                                       
-                    else if (!result.openings && lower.includes('opening'))  result.openings  = t;                                                                                      
-                    else if (!result.posted_on && lower.startsWith('posted')) result.posted_on = t;                                                                                     
-                    else if (!result.views && lower.includes('view')) result.views = t;                                                                                                 
-                    if (result.applicants && result.openings && result.posted_on) break;
-                }                                                                                                                                                                       
-                return result;
-            }                                                                                                                                                                           
-            """
+        () => {
+            const result = { applicants: '', openings: '', posted_on: '', views: '' };                                                                                              
+            const all = document.querySelectorAll('span, div, label');                                                                                                              
+            for (const el of all) {
+                const t = (el.innerText || '').trim();                                                                                                                              
+                if (!t || t.length > 80) continue;                                                                                                                                  
+                const lower = t.toLowerCase();
+                if (!result.applicants && lower.includes('applicant')) result.applicants = t;                                                                                       
+                else if (!result.openings && lower.includes('opening'))  result.openings  = t;                                                                                      
+                else if (!result.posted_on && lower.startsWith('posted')) result.posted_on = t;                                                                                     
+                else if (!result.views && lower.includes('view')) result.views = t;                                                                                                 
+                if (result.applicants && result.openings && result.posted_on) break;
+            }                                                                                                                                                                       
+            return result;
+        }                                                                                                                                                                           
+        """
         )
         return data
     except Exception as e:
