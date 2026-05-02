@@ -1,14 +1,13 @@
-#!/usr/bin/env bash
-set -euo pipefail
+  #!/usr/bin/env bash
+  set -euo pipefail                                                                                                                                                                                                  
+   
+  if ! command -v ruff >/dev/null 2>&1; then                                                                                                                                                                         
+    echo "ruff not found — installing..."                   
+    pip install ruff                                                                                                                                                                                                 
+  fi                                                        
 
-python - <<'PY'
-from pathlib import Path
-
-for p in Path(".").rglob("*.py"):
-    if ".venv" in p.parts or "venv" in p.parts:
-        continue
-    s = p.read_text()
-    p.write_text("\n".join([ln[2:] if ln.startswith("  ") else ln for ln in s.splitlines()]) + "\n")
-PY
-
-black .
+  # Format code (like prettier --write)                                                                                                                                                                              
+  ruff format .
+                                                                                                                                                                                                                     
+  # Sort imports + auto-fix lint issues                     
+  ruff check --fix 
